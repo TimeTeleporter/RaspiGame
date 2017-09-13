@@ -9,6 +9,7 @@ import ch.kinet.ladderboard.LadderBoard;
 import ch.kinet.ladderboard.LadderBoardButtonEvent;
 import ch.kinet.ladderboard.LadderBoardButtonListener;
 import ch.kinet.ladderboard.LadderBoardLed;
+import java.util.Random;
 
 /**
  *
@@ -22,6 +23,7 @@ public class RaspiGame {
     
     private LadderBoard ladderBoard;
     private LadderBoardButtonListener mainButtonListener;
+    private Random random;
     private boolean running = true;
     private int buttonsPressed = -1;
     private int score = 0;
@@ -78,22 +80,27 @@ public class RaspiGame {
             LadderBoard.LEDS.get((value+1)).off();
             System.out.println("Led " + (value+1) + " cleared");
         }
-        score = score⨥1;
-        
+        score = score + 1;
     }
     
     private void run() {
         int rounds = 32;
-        int random;
+        int randomNumber;
+        int flashes = score;
         
         ladderBoard.redLed.off();
         ladderBoard.greenLed.on();
         
         while (running) {
-            for(int i =0; i < rounds; i++){
-                random = random.nextInt(8));
+            for(int i = 0; i < rounds; i++){
+                randomNumber = random.nextInt(LadderBoard.NUM_LEDS);
+                LadderBoard.LEDS.get(randomNumber).on();
                 
                 LadderBoard.sleep(6000);
+            }
+            for(int i = 0; i < score; i++){
+                ladderBoard.ledSlide();
+                LadderBoard.sleep(333);
             }
             LadderBoard.sleep(500);
         }
