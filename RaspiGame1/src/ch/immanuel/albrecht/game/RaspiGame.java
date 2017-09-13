@@ -24,7 +24,7 @@ public class RaspiGame {
     private LadderBoardButtonListener mainButtonListener;
     private boolean running = true;
     private int buttonsPressed = -1;
-    private int score = 0
+    private int score = 0;
     
     
     public RaspiGame() {
@@ -78,12 +78,29 @@ public class RaspiGame {
             LadderBoard.LEDS.get((value+1)).off();
             System.out.println("Led " + (value+1) + " cleared");
         }
-        score = score+1
+        score = score⨥1;
         
     }
     
     private void run() {
-        //Hier ZufallsLed läuchten lasssen
+        int rounds = 32;
+        int random;
+        
+        ladderBoard.redLed.off();
+        ladderBoard.greenLed.on();
+        
+        while (running) {
+            for(int i =0; i < rounds; i++){
+                random = random.nextInt(8));
+                
+                LadderBoard.sleep(6000);
+            }
+            LadderBoard.sleep(500);
+        }
+        
+        ladderBoard.greenLed.off();
+        
+        
         
         ladderBoard.shutdown();
         System.exit(0);
