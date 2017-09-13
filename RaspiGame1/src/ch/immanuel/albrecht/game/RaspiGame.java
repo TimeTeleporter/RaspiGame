@@ -36,6 +36,7 @@ public class RaspiGame {
     
     
     private void init() {
+        random = new Random();
         ladderBoard = new LadderBoard();
         mainButtonListener = new LadderBoardButtonListener() {
 
@@ -49,6 +50,8 @@ public class RaspiGame {
                 // nothing to do here
             }
         };
+        
+        ladderBoard.addLadderBoardButtonListener(mainButtonListener);
     }
         
     protected void handleButtonEvent(LadderBoardButtonEvent event) {
@@ -59,15 +62,15 @@ public class RaspiGame {
         }
         else if (event.getButton().getIndex() == BUTTON_B && (LadderBoard.LEDS.get(2).isOn()|| LadderBoard.LEDS.get(3).isOn())){
             System.out.println("Button B pressed");
-            turnLedOff(0);
+            turnLedOff(2);
         }
         else if (event.getButton().getIndex() == BUTTON_C && (LadderBoard.LEDS.get(4).isOn()|| LadderBoard.LEDS.get(5).isOn())){
             System.out.println("Button C pressed");
-            turnLedOff(0);
+            turnLedOff(4);
         }
         else if (event.getButton().getIndex() == BUTTON_D && (LadderBoard.LEDS.get(6).isOn()|| LadderBoard.LEDS.get(7).isOn())){
             System.out.println("Button D pressed");
-            turnLedOff(0);
+            turnLedOff(6);
         }
     }
     
