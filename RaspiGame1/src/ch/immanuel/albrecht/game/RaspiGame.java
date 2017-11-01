@@ -56,19 +56,19 @@ public class RaspiGame {
         
     protected void handleButtonEvent(LadderBoardButtonEvent event) {
         
-        if (event.getButton().getIndex() == BUTTON_A && (LadderBoard.LEDS.get(0).isOn()|| LadderBoard.LEDS.get(1).isOn())){
+        if (getButtonPressed(event, BUTTON_A, 0)){
             System.out.println("Button A pressed");
             turnLedOff(0);
         }
-        else if (event.getButton().getIndex() == BUTTON_B && (LadderBoard.LEDS.get(2).isOn()|| LadderBoard.LEDS.get(3).isOn())){
+        else if (getButtonPressed(event, BUTTON_B, 2)){
             System.out.println("Button B pressed");
             turnLedOff(2);
         }
-        else if (event.getButton().getIndex() == BUTTON_C && (LadderBoard.LEDS.get(4).isOn()|| LadderBoard.LEDS.get(5).isOn())){
+        else if (getButtonPressed(event, BUTTON_C, 4)){
             System.out.println("Button C pressed");
             turnLedOff(4);
         }
-        else if (event.getButton().getIndex() == BUTTON_D && (LadderBoard.LEDS.get(6).isOn()|| LadderBoard.LEDS.get(7).isOn())){
+        else if (getButtonPressed(event, BUTTON_D, 6)){
             System.out.println("Button D pressed");
             turnLedOff(6);
         }
@@ -85,6 +85,10 @@ public class RaspiGame {
         }
         score = score + 1;
     }
+    // Returns true if the pressed button corresponds to the LED of its colour.
+    private boolean getButtonPressed(LadderBoardButtonEvent event, int button, int light){
+        return event.getButton().getIndex() == button && (LadderBoard.LEDS.get(light).isOn()|| LadderBoard.LEDS.get(light+1).isOn());
+    }        
     
     private void run() {
         int rounds = 32;
