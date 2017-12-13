@@ -25,9 +25,12 @@ public class RaspiGame {
     private LadderBoardButtonListener mainButtonListener;
     private Random random;
     private boolean running = true;
+    private boolean difficulty = false;
+    private boolean ingame = false;
+    private boolean exit = false;
     private int buttonsPressed = -1;
     private int score = 0;
-    
+    private int speed;
     
     public RaspiGame() {
         init();
@@ -55,22 +58,47 @@ public class RaspiGame {
     }
         
     protected void handleButtonEvent(LadderBoardButtonEvent event) {
-        
-        if (getButtonPressed(event, BUTTON_A, 0)){
-            System.out.println("Button A pressed");
-            turnLedOff(0);
+        // If you play, then handle buttonsEvents like the following
+        if (difficulty){
+            if (getButtonPressed(event, BUTTON_A)){
+                speed = 250;
+                System.out.println("Button A pressed \n Speed now" + speed);
+            }
+            else if (getButtonPressed(event, BUTTON_B)){
+                speed = 500;
+                System.out.println("Button B pressed \n Speed now" + speed);
+            }
+            else if (getButtonPressed(event, BUTTON_C)){
+                speed = 1000;
+                System.out.println("Button C pressed \n Speed now" + speed);
+            }
+            else if (getButtonPressed(event, BUTTON_D)){
+                speed = 2000;
+                System.out.println("Button D pressed \n Speed now" + speed);
+            }
+            difficulty = false;
         }
-        else if (getButtonPressed(event, BUTTON_B, 2)){
-            System.out.println("Button B pressed");
-            turnLedOff(2);
+        if (ingame) {
+            if (getButtonPressed(event, BUTTON_A) && getLedOn(0)){
+                System.out.println("Button A pressed");
+                turnLedOff(0);
+            }
+            else if (getButtonPressed(event, BUTTON_B) && getLedOn(2)){
+                System.out.println("Button B pressed");
+                turnLedOff(2);
+            }
+            else if (getButtonPressed(event, BUTTON_C) && getLedOn(4)){
+                System.out.println("Button C pressed");
+                turnLedOff(4);
+            }
+            else if (getButtonPressed(event, BUTTON_D) && getLedOn(6)){
+                System.out.println("Button D pressed");
+                turnLedOff(6);
+            }
+        score = score + 1;
         }
-        else if (getButtonPressed(event, BUTTON_C, 4)){
-            System.out.println("Button C pressed");
-            turnLedOff(4);
-        }
-        else if (getButtonPressed(event, BUTTON_D, 6)){
-            System.out.println("Button D pressed");
-            turnLedOff(6);
+        if (exit){
+            exit = false;
         }
     }
     
@@ -83,43 +111,87 @@ public class RaspiGame {
             LadderBoard.LEDS.get((value+1)).off();
             System.out.println("Led " + (value+1) + " cleared");
         }
-        score = score + 1;
     }
-    // Returns true if the pressed button corresponds to the LED of its colour.
-    private boolean getButtonPressed(LadderBoardButtonEvent event, int button, int light){
-        return event.getButton().getIndex() == button && (LadderBoard.LEDS.get(light).isOn()|| LadderBoard.LEDS.get(light+1).isOn());
-    }        
+    // Returns true if the pressed button corresponds to the wanted button.
+    private boolean getButtonPressed(LadderBoardButtonEvent event, int button){
+        return event.getButton().getIndex() == button;
+    }
+    // Returns true if the wanted colour fits with the Led which's on.
+    private boolean getLedOn(int light){
+        return LadderBoard.LEDS.get(light).isOn()|| LadderBoard.LEDS.get(light+1).isOn();
+    }
+    // 
     
     private void run() {
         int rounds = 32;
         int randomNumber;
-        int flashes = score;
         
+        /*int flashes = score;*/
         ladderBoard.redLed.off();
         ladderBoard.greenLed.on();
-        
+        while (difficulty){
+            for (int i = 0; i < LadderBoard.NUM_LEDS; i++){
+                LadderBoard.LEDS.get(i).on();
+            }
+        }
         while (running) {
+            // Rundenzähler
+            ingame = true;
             for(int i = 0; i < rounds; i++){
                 randomNumber = random.nextInt(LadderBoard.NUM_LEDS);
                 LadderBoard.LEDS.get(randomNumber).on();
-                
-                LadderBoard.sleep(6000);
+                LadderBoard.sleep(speed);
             }
-            for(int i = 0; i < score; i++){
-                ladderBoard.ledSlide();
-                LadderBoard.sleep(333);
+            ingame = false;
+            exit = true;
+            clearLeds();
+            displayPercent(rounds);
+            clearLeds();
+            animation(25, 8);
+            // ask for exit game
+            if (exit = true) {
+                running = false;
+            
             }
-            LadderBoard.sleep(500);
         }
-        
         ladderBoard.greenLed.off();
-        
-        
-        
         ladderBoard.shutdown();
         System.exit(0);
     }
-    
+    // Prozentualanzeige
+    private void displayPercent (int rounds){
+        int percent;
+        percent = (int)Math.ceil(score * 8 / rounds);
+        for(int i = 0; i < percent; i++){
+            LadderBoard.LEDS.get(i).on();
+        }
+        score = 0;
+        LadderBoard.sleep(5000);
+    }
+    private void clearLeds (){
+        for(int i = 0; i < LadderBoard.NUM_LEDS; i++){
+            LadderBoard.LEDS.get(i).off();
+            LadderBoard.sleep(125);
+        }
+    }
+    private void animation (int time, int rounds){
+        for (int i = 0; i < rounds; i++){
+            ladderBoard.LEDS.get(3).on();
+            ladderBoard.LEDS.get(4).on();
+            LadderBoard.sleep(time);
+            for(int j = 0; j < 3; j++){
+                ladderBoard.LEDS.get(2-j).on();
+                ladderBoard.LEDS.get(3+j).on();
+                LadderBoard.sleep(time);
+                ladderBoard.LEDS.get(3-j).off();
+                ladderBoard.LEDS.get(4+j).off();
+            }
+            LadderBoard.sleep(time);
+            ladderBoard.LEDS.get(0).off();
+            ladderBoard.LEDS.get(7).off();
+            // 150
+        }
+    }
     public static void main(String[] args) {
         new RaspiGame();
     }
