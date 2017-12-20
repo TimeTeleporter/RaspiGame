@@ -24,13 +24,16 @@ public class RaspiGame {
     private LadderBoard ladderBoard;
     private LadderBoardButtonListener mainButtonListener;
     private Random random;
-    private boolean running = true;
+    private boolean running = false;
     private boolean difficulty = false;
     private boolean ingame = false;
     private boolean exit = false;
+    private boolean speedset = false;
     private int buttonsPressed = -1;
     private int score = 0;
-    private int speed;
+    private int speed = 2000;
+    private int rounds = 10;
+    private final int GAMETIME = 20000;
     
     public RaspiGame() {
         init();
@@ -61,20 +64,20 @@ public class RaspiGame {
         // If you play, then handle buttonsEvents like the following
         if (difficulty){
             if (getButtonPressed(event, BUTTON_A)){
-                speed = 250;
-                System.out.println("Button A pressed \n Speed now" + speed);
+                setSpeed(250);
+                System.out.println("Button A pressed \n Speed now " + speed);
             }
             else if (getButtonPressed(event, BUTTON_B)){
-                speed = 500;
-                System.out.println("Button B pressed \n Speed now" + speed);
+                setSpeed(500);
+                System.out.println("Button B pressed \n Speed now " + speed);
             }
             else if (getButtonPressed(event, BUTTON_C)){
-                speed = 1000;
-                System.out.println("Button C pressed \n Speed now" + speed);
+                setSpeed(1000);
+                System.out.println("Button C pressed \n Speed now " + speed);
             }
             else if (getButtonPressed(event, BUTTON_D)){
-                speed = 2000;
-                System.out.println("Button D pressed \n Speed now" + speed);
+                setSpeed(2000);
+                System.out.println("Button D pressed \n Speed now " + speed);
             }
             difficulty = false;
         }
@@ -102,6 +105,12 @@ public class RaspiGame {
         }
     }
     
+    private void setSpeed(int howfast){
+        speed = howfast;
+        speedset = true;
+        rounds = GAMETIME/speed;
+    }
+    
     private void turnLedOff(int value) {
         if(LadderBoard.LEDS.get(value).isOn()){
             LadderBoard.LEDS.get(value).off();
@@ -123,17 +132,27 @@ public class RaspiGame {
     // 
     
     private void run() {
-        int rounds = 32;
         int randomNumber;
         
         /*int flashes = score;*/
         ladderBoard.redLed.off();
         ladderBoard.greenLed.on();
-        while (difficulty){
-            for (int i = 0; i < LadderBoard.NUM_LEDS; i++){
-                LadderBoard.LEDS.get(i).on();
-            }
+        
+        difficulty = true;
+        for (int i = 0; i < LadderBoard.NUM_LEDS; i++){
+            LadderBoard.LEDS.get(i).on();
+            LadderBoard.sleep(625);
+
         }
+
+        if(!speedset){
+            setSpeed(2000);
+            difficulty = false;
+            System.out.println("No Input \n Speed now:" + speed);
+        }
+        clearLeds();
+        System.out.println("Now playing");
+        running = true;
         while (running) {
             // Rundenzähler
             ingame = true;
@@ -143,11 +162,15 @@ public class RaspiGame {
                 LadderBoard.sleep(speed);
             }
             ingame = false;
-            exit = true;
             clearLeds();
+            exit = true;
             displayPercent(rounds);
             clearLeds();
-            animation(25, 8);
+            //animation(25, 8);
+            for (int i = 0; i < LadderBoard.NUM_LEDS; i++){
+                LadderBoard.LEDS.get(i).on();
+                LadderBoard.sleep(625);
+            }
             // ask for exit game
             if (exit = true) {
                 running = false;
@@ -162,6 +185,10 @@ public class RaspiGame {
     private void displayPercent (int rounds){
         int percent;
         percent = (int)Math.ceil(score * 8 / rounds);
+        // HACK! Change above linbe to remove this.
+        if (percent>=9) {
+            percent = 8;
+        } 
         for(int i = 0; i < percent; i++){
             LadderBoard.LEDS.get(i).on();
         }
@@ -192,6 +219,36 @@ public class RaspiGame {
             // 150
         }
     }
+    // Needs refactoring
+    /*private void human_won_animation() {
+        lb.rled.enable();
+        lb.gled.disable();
+        lb.cleds_disable();
+
+        int head = -1;
+        int counter = 0;
+        final int delay = 100;
+        while (true) {
+            Utility.sleep(delay);
+            head = (head + 1) % 8;
+            if (head == 0) {
+                counter++;
+                if (counter >= 8) {
+                    break;
+                }
+            }
+
+            lb.cled[head].enable();
+            lb.cled[(head + 4)%8].disable();
+        }
+        // The last four lights are still lit.
+        // Slowly put them off.
+        for (int i = 4; i < 8; i++) {
+            Utility.sleep(delay);
+            lb.cled[i].disable();
+        }
+    }*/
+    
     public static void main(String[] args) {
         new RaspiGame();
     }
